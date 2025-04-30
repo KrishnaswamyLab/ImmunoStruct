@@ -27,7 +27,7 @@ ImmunoStruct
 }
 ```
 
-## A multimodal network that integrates sequence, structure and biochemical properties
+## A multimodal network that integrates diverse information
 <img src = "assets/schematic.png" width=800>
 
 ## A novel cancer-wildtype contrastive learning
