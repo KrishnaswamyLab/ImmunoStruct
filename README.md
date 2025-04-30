@@ -55,6 +55,9 @@ These PyG graph files can be generated using `immunostruct/preprocessing/cancer_
 You first need to login to your wandb account on the website: https://wandb.ai/home, and create a project with the name matching the wandb project string in the corresponding training file (look for `wandb.init`).
 
 Then, you can run the training scripts with your wandb username (`YOUR_WANDB_USERNAME`).
+
+#### Experiments on IEDB infectious diseases.
+TO BE UPDATED!!!!
 ```
 python train_PropIEDB_PropCancer_ImmunoCancer.py --full-sequence --sequence-loss --model HybridModelv2 --wandb-username $YOUR_WANDB_USERNAME
 python train_PropIEDB_PropCancer_ImmunoCancer.py --full-sequence --sequence-loss --model HybridModel --wandb-username $YOUR_WANDB_USERNAME
@@ -62,6 +65,9 @@ python train_PropIEDB_PropCancer_ImmunoCancer.py --full-sequence --sequence-loss
 python train_PropIEDB_PropCancer_ImmunoCancer.py --full-sequence --sequence-loss --model SequenceModel --wandb-username $YOUR_WANDB_USERNAME
 python train_PropIEDB_PropCancer_ImmunoCancer.py --full-sequence --model StructureModel --wandb-username $YOUR_WANDB_USERNAME
 ```
+
+#### Experiments on human cancer neoepitopes.
+TO BE UPDATED!!!!
 
 
 ## Environment
@@ -92,4 +98,3 @@ python -m pip install multiscale-phate
     ```
     export LD_LIBRARY_PATH=/home/cl2482/.conda/envs/immuno/lib:$LD_LIBRARY_PATH
     ```
-# ImmunoStruct
