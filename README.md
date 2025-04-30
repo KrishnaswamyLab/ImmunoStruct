@@ -1,11 +1,42 @@
-# ImmunoStruct
+<h1 align="center">
+ImmunoStruct
+</h1>
 
-## Overview
-Within the therapeutic landscape of vaccine-based immunotherapy, epitope based vaccines have emerged as an exciting therapeutic modality. However, epitope-based vaccine success hinges on the precise prioritization of class-I neoantigens that are immunogenic - an attribute observed in only a fraction of the total peptides used to vaccinate the patient. Current prioritization methods are primarily sequence-based not accounting for the intricate interplay between the structural and sequential characteristics of the peptide-MHC complex (pMHC). The clinical implications of this shortcoming are significant given the necessity to restrict encapsulated epitope delivery to a selected number of candidates - often restricted to less than several dozen. Therefore, it is of high clinical interest to increase the percentage of immunogenic administered peptides. The present study explores the wide scale integration of structural and sequence data to enhance the accuracy and interpretability of immunogenicity prediction. To this end, we have curated a dataset of ~27,000 peptide-MHC complexes using AlphaFold2, with each complex paired to an experimentally determined immunogenicity measurement. By leveraging this data, we developed \textit{ImmunoStruct}, a deep-learning model that integrates both sequence and structural information to predict peptide-MHC immunogenicity. We further identify potential relationships between different structural features of the peptide-MHC complex to interpret physicochemical properties underpinning immunogenicity and explore substructural pMHC immunogenicity motifs. This work seeks to improve epitope-based vaccine design by integrating structural information with pMHC sequence information to improve the prediction of immunogenic epitopes.
+<p align="center">
+<strong>A multimodal neural network framework for immunogenicity prediction from peptide-MHC sequence, structure, and biochemical properties</strong>
+</p>
 
-## Graphical Abstract
+<div align="center">
+
+[![bioRxiv](https://img.shields.io/badge/bioRxiv-ImmunoStruct-firebrick)](https://www.biorxiv.org/content/10.1101/2024.11.01.621580)
+[![Twitter](https://img.shields.io/twitter/follow/KrishnaswamyLab.svg?style=social)](https://twitter.com/KrishnaswamyLab)
+[![Github Stars](https://img.shields.io/github/stars/KrishnaswamyLab/ImmunoStruct.svg?style=social&label=Stars)](https://github.com/KrishnaswamyLab/ImmunoStruct/)
+
+</div>
+
 
 ## Citation
+```
+@article{givechian2024immunostruct,
+  title={ImmunoStruct: Integration of protein sequence, structure, and biochemical properties for immunogenicity prediction and interpretation},
+  author={Givechian, Kevin Bijan and Rocha, Joao Felipe and Yang, Edward and Liu, Chen and Greene, Kerrie and Ying, Rex and Caron, Etienne and Iwasaki, Akiko and Krishnaswamy, Smita},
+  journal={bioRxiv},
+  pages={2024--11},
+  year={2024},
+  publisher={Cold Spring Harbor Laboratory}
+}
+```
+
+## Schematic
+<img src = "assets/schematic.png" width=800>
+
+## A novel cancer-wildtype contrastive learning
+<img src = "assets/contrastive_learning.png" width=800>
+
+
+## Abstract
+Epitope-based vaccines are promising therapeutic modalities for infectious diseases and cancer, but identifying immunogenic epitopes is challenging. The vast majority of prediction methods only use amino acid sequence information, and do not incorporate wide-scale structure data and biochemical properties across each peptide-MHC. We present ImmunoStruct, a deep-learning model that integrates sequence, structural, and biochemical information to predict multi-allele class-I peptide-MHC immunogenicity. By leveraging a multimodal dataset of $\sim$27,000 peptide-MHCs, we demonstrate that ImmunoStruct improves immunogenicity prediction performance and interpretability beyond existing methods, across infectious disease epitopes and cancer neoepitopes. We further show strong alignment with \textit{in vitro} assay results for a set of SARS-CoV-2 epitopes, as well as strong performance in peptide-MHC-based cancer patient survival prediction. Overall, this work also presents a new architecture that incorporates equivariant graph processing and multimodal data integration for the long standing task in immunotherapy.
+
 
 ## Usage
 ### Data preparation
@@ -31,6 +62,7 @@ python train_PropIEDB_PropCancer_ImmunoCancer.py --full-sequence --sequence-loss
 python train_PropIEDB_PropCancer_ImmunoCancer.py --full-sequence --sequence-loss --model SequenceModel --wandb-username $YOUR_WANDB_USERNAME
 python train_PropIEDB_PropCancer_ImmunoCancer.py --full-sequence --model StructureModel --wandb-username $YOUR_WANDB_USERNAME
 ```
+
 
 ## Environment
 ```
