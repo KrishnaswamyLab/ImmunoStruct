@@ -57,15 +57,15 @@
   <img src="assets/schematic.png" alt="ImmunoStruct Architecture" width="800">
 </div>
 
-ImmunoStruct is a deep learning framework that integrates sequence, structural, and biochemical information to predict multi-allele class-I peptide-MHC immunogenicity. By leveraging multimodal data from ~27,000 peptide-MHCs, ImmunoStruct significantly improves immunogenicity prediction performance for both infectious disease epitopes and cancer neoepitopes.
+ImmunoStruct is a multimodal deep learning framework that integrates sequence, structural, and biochemical information to predict multi-allele class-I peptide-MHC immunogenicity. By leveraging multimodal data from ~27,000 peptide-MHCs and jointly modeling sequence and structure, ImmunoStruct significantly improves immunogenicity prediction performance for both infectious disease epitopes and cancer neoepitopes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Key Features
 
-* **Multimodal Integration**: Combines protein sequence, structure, and biochemical properties
+* **Multimodal Integration**: Combines peptide-MHC protein sequence, structure, and biochemical properties
 * **Novel Cancer-Wildtype Contrastive Learning**: Enhances specificity for cancer neoepitope detection  
-* **Enhanced Interpretability**: Provides insights into the molecular basis of immunogenicity
+* **Enhanced Interpretability**: Provides insights into the substructural basis of immunogenicity
 
 <div align="center">
   <img src="assets/contrastive_learning.png" alt="Contrastive Learning Approach" width="800">
