@@ -13,7 +13,7 @@
 
   <p align="left">
     <b>ImmunoStruct</b>: A multimodal neural network framework for immunogenicity prediction from peptide-MHC sequence, structure, and biochemical properties
-    <a href="https://www.biorxiv.org/content/10.1101/2024.11.01.621580"><strong>Explore the paper »</strong></a>
+    &nbsp&nbsp&nbsp<a href="https://www.biorxiv.org/content/10.1101/2024.11.01.621580"><strong>Explore the paper »</strong></a>
     <br />
   </p>
 </div>
