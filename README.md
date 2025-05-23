@@ -12,7 +12,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/KrishnaswamyLab/ImmunoStruct.svg?style=social\&label=Stars)](https://github.com/KrishnaswamyLab/ImmunoStruct)
 
   <p align="left">
-    **ImmunoStruct**: A multimodal neural network framework for immunogenicity prediction from peptide-MHC sequence, structure, and biochemical properties
+    <b>ImmunoStruct</b>: A multimodal neural network framework for immunogenicity prediction from peptide-MHC sequence, structure, and biochemical properties
     <br />
     <a href="https://www.biorxiv.org/content/10.1101/2024.11.01.621580"><strong>Explore the paper »</strong></a>
     <br />
