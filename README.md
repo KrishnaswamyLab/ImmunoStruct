@@ -30,6 +30,7 @@
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
+    <li><a href="#citation">Citation</a></li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
@@ -43,7 +44,6 @@
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#citation">Citation</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
@@ -71,6 +71,23 @@ ImmunoStruct is a multimodal deep learning framework that integrates sequence, s
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- CITATION -->
+## Citation
+
+If you use ImmunoStruct in your research, please cite our paper:
+
+```bibtex
+@article{givechian2024immunostruct,
+  title={ImmunoStruct: a multimodal neural network framework for immunogenicity prediction from peptide-MHC sequence, structure, and biochemical properties},
+  author={Givechian, Kevin Bijan and Rocha, Joao Felipe and Yang, Edward and Liu, Chen and Greene, Kerrie and Ying, Rex and Caron, Etienne and Iwasaki, Akiko and Krishnaswamy, Smita},
+  journal={bioRxiv},
+  pages={2024--11},
+  year={2024},
+  publisher={Cold Spring Harbor Laboratory}
+}
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -236,23 +253,6 @@ Project Link: [https://github.com/KrishnaswamyLab/ImmunoStruct](https://github.c
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CITATION -->
-## Citation
-
-If you use ImmunoStruct in your research, please cite our paper:
-
-```bibtex
-@article{givechian2024immunostruct,
-  title={ImmunoStruct: Integration of protein sequence, structure, and biochemical properties for immunogenicity prediction and interpretation},
-  author={Givechian, Kevin Bijan and Rocha, Joao Felipe and Yang, Edward and Liu, Chen and Greene, Kerrie and Ying, Rex and Caron, Etienne and Iwasaki, Akiko and Krishnaswamy, Smita},
-  journal={bioRxiv},
-  pages={2024--11},
-  year={2024},
-  publisher={Cold Spring Harbor Laboratory}
-}
-```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [biorxiv-shield]: https://img.shields.io/badge/bioRxiv-ImmunoStruct-firebrick?style=for-the-badge
