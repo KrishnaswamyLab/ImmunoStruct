@@ -10,3 +10,10 @@ data/alphafold_pdb_*/
 data/regenerated/
 .DS_Store
 __pycache__/
+
+# Mprop preprocessing: the antigen.garnish IEDB reference data is fetched;
+# see the foreignness module's docstring for the curl.
+data/iedb.fasta
+data/Mu_iedb.fasta
+data/iedb.bdb.*
+data/Mu_iedb.fasta.*

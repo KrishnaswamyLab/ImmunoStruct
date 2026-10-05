@@ -8,16 +8,22 @@ structure, in four stages:
     1. 84 biochemical properties per peptide from the `peptides` package
        (75 descriptor scales + 9 scalars).
     2. Solvent-accessible surface area per structure, via mdtraj Shrake-Rupley.
-    3. A quantile transform of the foreignness score, then Gaussian smoothing
-       of both foreignness and SASA.
+    3. The foreignness score, then a quantile transform of it and Gaussian
+       smoothing of both foreignness and SASA.
     4. Mprop1, Mprop2 and master_property_score, each the mean of a min-max
        scaled subset of the columns above.
 
 Which columns feed which meta-property is set per dataset in SPECS.
 
+The foreignness score of stage 3 is computed by the foreignness module, which
+implements the Luksza et al. multistate thermodynamic model; pass
+--compute-foreignness, or supply the column yourself.  See that module's
+docstring for the reference data it needs.
+
     pip install pandas numpy scipy scikit-learn peptides mdtraj
 
 mdtraj is only needed with --pdb-dir; the cedar_wt spec uses no structures.
+--compute-foreignness additionally needs blastp on PATH.
 """
 
 import argparse
@@ -380,6 +386,14 @@ def main():
                              "column")
     parser.add_argument("--sasa-from",
                         help="CSV with a precomputed SASA column to join instead")
+    parser.add_argument("--compute-foreignness", action="store_true",
+                        help="compute the spec's foreignness column instead of "
+                             "reading it from the table")
+    parser.add_argument("--foreignness-db",
+                        help="blastp database prefix for --compute-foreignness "
+                             "(default: data/iedb.bdb)")
+    parser.add_argument("--blast-threads", type=int, default=1,
+                        help="threads for the blastp call")
     parser.add_argument("--scaler-out",
                         help="write the fitted min/max ranges here as JSON")
     parser.add_argument("--reuse-existing-props", action="store_true",
@@ -425,6 +439,31 @@ def main():
             )
         else:
             print(f"reusing existing '{spec['sasa_col']}' column")
+
+    if spec["foreign_col"] is not None:
+        if args.compute_foreignness:
+            # imported here: the foreignness module pulls in no new hard
+            # dependency, but the other stages have no use for it.
+            try:
+                from .foreignness import DEFAULT_DATA_DIR, foreignness_for_table
+            except ImportError:
+                from foreignness import DEFAULT_DATA_DIR, foreignness_for_table
+
+            db = args.foreignness_db or os.path.join(DEFAULT_DATA_DIR, "iedb.bdb")
+            print("computing foreignness...")
+            df[spec["foreign_col"]] = foreignness_for_table(
+                df[spec["peptide_col"]].tolist(), db,
+                threads=args.blast_threads,
+            )
+        elif spec["foreign_col"] not in df.columns:
+            raise SystemExit(
+                f"spec '{args.dataset}' needs '{spec['foreign_col']}'; pass "
+                "--compute-foreignness, or use a table that already has it. "
+                "The score is not part of the biochemical descriptors: see the "
+                "foreignness module for how it is computed."
+            )
+        else:
+            print(f"reusing existing '{spec['foreign_col']}' column")
 
     print("smoothing...")
     df = add_smoothed(df, spec)
