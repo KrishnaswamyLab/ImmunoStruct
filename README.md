@@ -152,7 +152,7 @@ Before installation, ensure you have:
 Place the following files in the `data/` folder:
 - `cedar_data_final_with_mprop1_mprop2_v2.txt`
 - `complete_score_Mprops_1_2_smoothed_sasa_v2.txt`
-- `HLA_27_seqs_csv.csv`
+- `HLA_27_seqs.csv`
 
 Additionally, ensure you have these folders:
 - `graph_pyg_Cancer`
@@ -206,21 +206,62 @@ ranges as JSON.
 3. **Structure join.** Files are named
    `rank_1_prediction_Immuno<HLA><peptide>_<5hex>.pdb`, where the key is
    `sha1(hla_seq + peptide)[:5]`.
-4. **Smoothing.** `QuantileTransformer` on the foreignness score, then
-   `gaussian_filter1d` (sigma 3 for foreignness, 5 for IEDB SASA, 3 for cedar
-   SASA).
+4. **Foreignness**, then **smoothing.** The foreignness score is computed by
+   `foreignness.py` (see below) or read from the table, then passed through
+
 5. **Meta-properties.** Each of `Mprop1`, `Mprop2` and `master_property_score`
    is the mean of a min-max-scaled subset of the columns above. The per-dataset
    member lists are in `SPECS` and are fixed inputs.
 
-Two consequences of stages 4 and 5 are worth knowing, because they make the
-features table-level rather than per-peptide:
 
-- `gaussian_filter1d` runs along the DataFrame row axis, so **the input table
-  must be passed in its original row order**. Sorting or filtering upstream
-  changes every output value, and a single peptide cannot be scored alone.
-- `MinMaxScaler` is fit over the whole table, so the values are dataset-relative.
-  `--scaler-out` writes the fitted ranges to JSON for reuse.
+**Foreignness**
+
+`Mprop1` (IEDB) and `Mprop2` (cedar) both average in `smoothed_foreign`, so a
+new peptide set needs a foreignness score before it can have meta-properties at
+all. `immunostruct/preprocessing/foreignness.py` computes it, implementing the
+multistate thermodynamic model of Luksza et al. 2017:
+
+```
+Z(s) = sum_e exp( -k * (a - |s,e|) )        a = 26,  k = 4.86936
+R(s) = Z / (1 + Z)
+```
+
+where `|s,e|` is the best local alignment score (BLOSUM62, affine gaps, open 11
+extend 1) between the peptide and an IEDB immunogenic epitope `e`. The
+parameters and the alignment settings follow
+[antigen.garnish](https://github.com/andrewrech/antigen.garnish), which produced
+the released `Foreignness_Score` column.
+
+
+
+```sh
+# NCBI BLAST+ is required for the default mode
+conda install -c bioconda blast
+
+curl -fsSL https://s3.amazonaws.com/get.rech.io/antigen.garnish-2.3.0.tar.gz -o ag.tar.gz
+
+tar -xzf ag.tar.gz -C data --strip-components=1 --wildcards '*iedb*'   # GNU
+```
+
+That yields `data/iedb.fasta` and `data/iedb.bdb.*` (human) plus
+`data/Mu_iedb.fasta` (mouse). 
+
+Then either compute the column as part of the Mprop run:
+
+```sh
+python immunostruct/preprocessing/biochem_properties.py \
+    --dataset iedb --compute-foreignness \
+    --in-table  my_peptides.csv \
+    --out-table my_peptides_with_mprop.csv
+```
+
+or score peptides on their own:
+
+```sh
+python immunostruct/preprocessing/foreignness.py \
+    --peptides my_peptides.csv --peptide-col peptide \
+    --db data/iedb.bdb -o foreignness.csv
+```
 
 **Structures**
 
