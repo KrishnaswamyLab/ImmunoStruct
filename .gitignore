@@ -3,3 +3,10 @@
 *.pt
 */wandb/*
 */figures/*
+# Mprop preprocessing: extracted structures and regenerated tables are build
+# artifacts; the structures come from ../../5_Data/*.zip via
+# ./reproduce_mprops.sh --extract
+data/alphafold_pdb_*/
+data/regenerated/
+.DS_Store
+__pycache__/

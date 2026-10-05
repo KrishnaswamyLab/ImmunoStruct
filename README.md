@@ -505,6 +505,95 @@ We have provided the structure data encoded as PyTorch Geometric (PyG) graphs on
 </details>
 <br>
 
+**Compute the biochemical meta-properties (`Mprop1` / `Mprop2`):**
+
+`Mprop1` and `Mprop2` are the 2-d property vector each model consumes. The
+tables in `data/` already carry them; this step computes them for a new dataset
+or a new set of peptides.
+
+```sh
+pip install peptides==0.5.0 mdtraj
+```
+
+One table is processed per run, with `--dataset` selecting which column spec to
+apply:
+
+```sh
+python immunostruct/preprocessing/biochem_properties.py \
+    --dataset cedar_wt \
+    --in-table  my_peptides.csv \
+    --out-table my_peptides_with_mprop.csv
+```
+
+
+`--out-table` is always a new file; input tables are never written to. Add
+`--reuse-existing-props` to keep a table's own descriptor columns instead of
+recomputing them from sequence, and `--scaler-out` to record the fitted min/max
+ranges as JSON.
+
+**The pipeline.** Five stages, from peptide sequence and pMHC structure to the
+2-D vector the models consume via `nn.Linear(2, 32)`:
+
+1. **84 biochemical properties** per peptide from the `peptides` package — the 75
+   descriptor-scale columns listed in `DESCRIPTORS_75` plus 9 scalars. The
+   package version is pinned because `.descriptors()` returns 102 keys in 0.5.0,
+   so the original 75 are selected explicitly rather than taken from whatever
+   the call returns.
+2. **SASA** via `mdtraj.shrake_rupley` (`probe_radius=0.14`,
+   `n_sphere_points=960`). The structures are a single fused chain of 272 MHC residues followed by the 9–11mer, so the default
+   `--sasa-mode peptide_tail` sums over the trailing peptide residues;
+3. **Structure join.** Files are named
+   `rank_1_prediction_Immuno<HLA><peptide>_<5hex>.pdb`, where the key is
+   `sha1(hla_seq + peptide)[:5]`.
+4. **Smoothing.** `QuantileTransformer` on the foreignness score, then
+   `gaussian_filter1d` (sigma 3 for foreignness, 5 for IEDB SASA, 3 for cedar
+   SASA).
+5. **Meta-properties.** Each of `Mprop1`, `Mprop2` and `master_property_score`
+   is the mean of a min-max-scaled subset of the columns above. The per-dataset
+   member lists are in `SPECS` and are fixed inputs.
+
+Two consequences of stages 4 and 5 are worth knowing, because they make the
+features table-level rather than per-peptide:
+
+- `gaussian_filter1d` runs along the DataFrame row axis, so **the input table
+  must be passed in its original row order**. Sorting or filtering upstream
+  changes every output value, and a single peptide cannot be scored alone.
+- `MinMaxScaler` is fit over the whole table, so the values are dataset-relative.
+  `--scaler-out` writes the fitted ranges to JSON for reuse.
+
+**Structures**
+
+The SASA stage reads pMHC structures from the folder given to `--pdb-dir`, in
+the same way the graph construction step above reads its AlphaFold folders.
+Place them under `data/`, for example `data/alphafold_pdb_cedar/`.
+
+Each row is matched to a file by the 5-hex suffix of its filename, which is
+`sha1(hla_seq + peptide)[:5]` -- the same key the graph pipeline uses. AlphaFold
+output named `rank_1_prediction_Immuno<HLA><peptide>_<5hex>.pdb` therefore joins
+without renaming. Rows with no matching structure get `NaN`, and the run reports
+how many.
+
+The key comes from the table's `file_id_code` or `id` column when present.
+
+**Putting a new cohort on an existing scale**
+
+Two stages fit on the rows present: the `QuantileTransformer` over the
+foreignness column, and the `MinMaxScaler` over each meta-property's inputs. A
+cohort processed on its own therefore lands on its own scale. To place it on the
+scale of one of the tables in `data/`, append it to that table and process the
+two together, keeping the reference rows first and in their original order:
+
+```python
+import pandas as pd
+ref = pd.read_table("data/cedar_data_final_with_mprop1_mprop2_v2.txt")
+new = pd.read_table("new_cohort.txt")
+pd.concat([ref, new], ignore_index=True).to_csv(
+    "combined.txt", sep="\t", index=False)
+```
+
+Process `combined.txt` with the matching `--dataset`, then keep the trailing
+rows.
+
 ### Training and Testing
 1. **Activate the environment**
     ```sh
