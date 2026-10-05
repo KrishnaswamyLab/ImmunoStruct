@@ -4,7 +4,7 @@ import torch
 import wandb
 from dgl.dataloading import GraphDataLoader
 
-from data import ImmunoPredDataset, collate, SplitDataset, collate_amino_acid
+from data_loading import ImmunoPredDataset, collate, SplitDataset, collate_amino_acid
 from models.mapping import model_map
 from utils import Losses, seed_everything, update_paths
 from procedures import inference, train_model, inference_SSL, train_model_SSL
@@ -23,10 +23,10 @@ if __name__ == "__main__":
     parser.add_argument("--coord-size", default=3, type=int)
     parser.add_argument("--model-save-dir", default="$ROOT/results/PropIEDB_ImmunoIEDB_PropCancer_ImmunoCancer/", type=str)
     parser.add_argument("--graph-dir-IEDB", default="$ROOT/data/graph_pyg_IEDB/", type=str)
-    parser.add_argument("--graph-dir-cancer", default="$ROOT/data/graph_pyg_Cancer/", type=str)
-    parser.add_argument("--property-path-IEDB", default="$ROOT/data/complete_score_Mprops_1_2_smoothed_sasa_v2.txt", type=str)
-    parser.add_argument("--property-path-cancer", default="$ROOT/data/cedar_data_final_with_mprop1_mprop2_v2.txt", type=str)
-    parser.add_argument("--hla-path", default="$ROOT/data/HLA_27_seqs_csv.csv", type=str)
+    parser.add_argument("--graph-dir-cancer", default="$ROOT/data/graph_pyg_CEDAR_cancer/", type=str)
+    parser.add_argument("--property-path-IEDB", default="$ROOT/data/ImmunoStruct_IEDB_data.csv", type=str)
+    parser.add_argument("--property-path-cancer", default="$ROOT/data/ImmunoStruct_CEDAR_data_cancer.csv", type=str)
+    parser.add_argument("--hla-path", default="$ROOT/data/HLA_allele_sequences.csv", type=str)
     parser.add_argument("--seed", default=1, type=int)
     parser.add_argument("--wandb-username", default=None, type=str)
     parser.add_argument("--sequence-pad-count", default=0, type=int)

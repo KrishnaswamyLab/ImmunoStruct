@@ -25,18 +25,9 @@ def convert_patient_code(patient_code):
         return patient_code
 
 
-def clinical_pvalues(predicted_probs_clinical, fig_save_path=None):
-
-    current_platform = platform.system()
-    if current_platform == 'Windows':
-        ROOT_DIR = "\\".join(os.path.realpath(__file__).split("\\")[:-3])
-    elif current_platform == 'Linux':
-        ROOT_DIR = "/".join(os.path.realpath(__file__).split("/")[:-3])
-    else:
-        raise NotImplementedError(f"Cannot support the current platform: {current_platform}.")
-
-    seq_df = pd.read_table(os.path.join(ROOT_DIR, 'data', 'hadrup_cancer_df_29K.txt'))
-    clin_df = pd.read_table(os.path.join(ROOT_DIR, 'data', 'All_samples_clinical.txt'))
+def clinical_pvalues(predicted_probs_clinical, clin_seq_path, clin_survival_path, result_save_path=None, fig_save_path=None):
+    seq_df = pd.read_csv(clin_seq_path)
+    survival_df = pd.read_csv(clin_survival_path)
 
     seq_df['patient_ID'] = seq_df['patient'].apply(convert_patient_code)
 
@@ -51,27 +42,21 @@ def clinical_pvalues(predicted_probs_clinical, fig_save_path=None):
     immunostruct_load_df = seq_df.groupby('patient_ID')['ImmunoStruct_predicted'].sum().reset_index()
     immunostruct_load_df = immunostruct_load_df.sort_values('patient_ID')
 
-    # Replace commas with decimal points in the PFS.Time and OS.Time columns
-    clin_df['PFS.Time'] = clin_df['PFS.Time'].astype(str).str.replace(',', '.')
-    clin_df['OS.Time'] = clin_df['OS.Time'].astype(str).str.replace(',', '.')
-
-    # Optionally, convert the columns back to floats
-    clin_df['PFS.Time'] = clin_df['PFS.Time'].astype(float)
-    clin_df['OS.Time'] = clin_df['OS.Time'].astype(float)
-
-    clin_df['patient_ID'] = clin_df['Patient']
-    clin_df = clin_df.sort_values('patient_ID')
+    survival_df['patient_ID'] = survival_df['Patient']
+    survival_df = survival_df.sort_values('patient_ID')
 
     # Merge this new ImmunoStruct_predicted_load back into the main clinical dataframe
-    clin_df['ImmunoStruct_predicted_load'] = immunostruct_load_df['ImmunoStruct_predicted'].tolist()
-    clin_df.to_csv(os.path.join(ROOT_DIR, 'results', 'clinical_results.csv'))
-    
+    survival_df['ImmunoStruct_predicted_load'] = immunostruct_load_df['ImmunoStruct_predicted'].tolist()
+    if result_save_path is not None:
+        os.makedirs(os.path.dirname(result_save_path), exist_ok=True)
+        survival_df.to_csv(result_save_path)
+
     # Define a threshold to split ImmunoStruct_predicted_load into low and high groups
-    low_group_threshold = np.percentile(clin_df['ImmunoStruct_predicted_load'], 50)
-    high_group_threshold = np.percentile(clin_df['ImmunoStruct_predicted_load'], 50)
+    low_group_threshold = np.percentile(survival_df['ImmunoStruct_predicted_load'], 50)
+    high_group_threshold = np.percentile(survival_df['ImmunoStruct_predicted_load'], 50)
     assert low_group_threshold <= high_group_threshold
-    low_immuno_struct = clin_df[clin_df['ImmunoStruct_predicted_load'] <= low_group_threshold]
-    high_immuno_struct = clin_df[clin_df['ImmunoStruct_predicted_load'] >= high_group_threshold]
+    low_immuno_struct = survival_df[survival_df['ImmunoStruct_predicted_load'] <= low_group_threshold]
+    high_immuno_struct = survival_df[survival_df['ImmunoStruct_predicted_load'] >= high_group_threshold]
 
     # Perform the log-rank test for OS
     result_os = logrank_test(low_immuno_struct['OS.Time'], high_immuno_struct['OS.Time'],
@@ -164,7 +149,7 @@ def plot_clinical_validation(low_immuno_struct, high_immuno_struct, fig_save_pat
     fig.tight_layout(pad=2)
     fig.savefig(fig_save_path)
 
-def inference_clinical_only(config, model, device, clinical_loader=None, fig_save_folder=None):
+def inference_clinical_only(config, model, device, clinical_loader=None, clin_seq_path=None, clin_survival_path=None, fig_save_folder=None):
     model.eval()
     predicted_probs_clinical = []  # Store raw probabilities for clinical p values
     output_dict = {}
@@ -200,7 +185,10 @@ def inference_clinical_only(config, model, device, clinical_loader=None, fig_sav
 
     predicted_probs_clinical = np.array(predicted_probs_clinical)
     os_p_value, pfs_p_value = clinical_pvalues(predicted_probs_clinical,
-                                                fig_save_path=os.path.join(fig_save_folder, 'clinical_p_value.png'))
+                                               clin_seq_path=clin_seq_path,
+                                               clin_survival_path=clin_survival_path,
+                                               result_save_path=os.path.join(fig_save_folder, 'clinical_results.csv'),
+                                               fig_save_path=os.path.join(fig_save_folder, 'clinical_p_value.png'))
 
     print('clinical metrics')
     print(f'OS p-value: {os_p_value:.4f}')
@@ -211,6 +199,21 @@ def inference_clinical_only(config, model, device, clinical_loader=None, fig_sav
     return output_dict
 
 if __name__ == '__main__':
-    os_p_value, pfs_p_value = clinical_pvalues([1 for _ in range(29484)], fig_save_path='test_clinical_validation.png')
+
+    current_platform = platform.system()
+    if current_platform == 'Windows':
+        ROOT_DIR = "\\".join(os.path.realpath(__file__).split("\\")[:-3])
+    elif current_platform == 'Linux':
+        ROOT_DIR = "/".join(os.path.realpath(__file__).split("/")[:-3])
+    else:
+        raise NotImplementedError(f"Cannot support the current platform: {current_platform}.")
+    seq_df_path = os.path.join(ROOT_DIR, 'data', 'ImmunoStruct_clinical_data.csv')
+    clin_df_path = os.path.join(ROOT_DIR, 'data', 'ImmunoStruct_clinical_data_survival.csv')
+
+    os_p_value, pfs_p_value = clinical_pvalues([1 for _ in range(29484)],
+                                               clin_seq_path=seq_df_path,
+                                               clin_survival_path=clin_df_path,
+                                               result_save_path='./test/test_clinical_results.csv',
+                                               fig_save_path='./test/test_clinical_validation.png')
     print(f'OS p-value: {os_p_value:.4f}')
     print(f'PFS p-value: {pfs_p_value:.4f}')

@@ -1,0 +1,2 @@
+AMINO_ACIDS = 'ACDEFGHIKLMNPQRSTVWY'  # 20 standard amino acids
+PADDING_CHAR = 'J'

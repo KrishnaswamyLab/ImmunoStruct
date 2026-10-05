@@ -4,7 +4,7 @@ import torch
 import wandb
 from dgl.dataloading import GraphDataLoader
 
-from data import ImmunoPredDataset, collate, SplitDataset, collate_amino_acid, ExtendedDataset, ClinicalDataset
+from data_loading import ImmunoPredDataset, collate, SplitDataset, collate_amino_acid, ExtendedDataset, ClinicalDataset
 from models.mapping import model_map
 from utils import Losses, seed_everything, LinearWarmupCosineAnnealingLR, update_paths
 from procedures import inference, train_model, train_model, inference_SSL, train_model_SSL, train_model_SSL
@@ -25,11 +25,11 @@ if __name__ == "__main__":
     parser.add_argument("--min-finetuning-batches", default=64, type=int)
     parser.add_argument("--model-save-dir", default="$ROOT/checkpoints/PropIEDB_PropCancer_ImmunoCancer/", type=str)
     parser.add_argument("--figure-save-dir", default="$ROOT/figures/PropIEDB_PropCancer_ImmunoCancer/", type=str)
-    parser.add_argument("--graph-dir-cancer", default="$ROOT/data/graph_pyg_Cancer/", type=str)
-    parser.add_argument("--property-path-cancer", default="$ROOT/data/cedar_data_final_with_mprop1_mprop2_v2.txt", type=str)
-    parser.add_argument("--graph-dir-clinical", default="$ROOT/data/graph_pyg_Clinical/", type=str)
-    parser.add_argument("--seq-path-clinical", default="$ROOT/data/hadrup_cancer_df_29K.txt", type=str)
-    parser.add_argument("--hla-path", default="$ROOT/data/HLA_27_seqs_csv.csv", type=str)
+    parser.add_argument("--graph-dir-cancer", default="$ROOT/data/graph_pyg_CEDAR_cancer/", type=str)
+    parser.add_argument("--property-path-cancer", default="$ROOT/data/ImmunoStruct_CEDAR_data_cancer.csv", type=str)
+    parser.add_argument("--graph-dir-clinical", default="$ROOT/data/graph_pyg_clinical/", type=str)
+    parser.add_argument("--seq-path-clinical", default="$ROOT/data/ImmunoStruct_clinical_data.csv", type=str)
+    parser.add_argument("--hla-path", default="$ROOT/data/HLA_allele_sequences.csv", type=str)
     parser.add_argument("--seed", default=1, type=int)
     parser.add_argument("--wandb-username", default=None, type=str)
     parser.add_argument("--sequence-pad-count", default=0, type=int)
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     train_split_dataset = SplitDataset(train_dataset_ft, "train", binary=True, full=config.full_sequence, comparative=False, return_amino_acid=config.self_supervision)
     val_split_dataset = SplitDataset(val_dataset_ft, "val", binary=True, full=config.full_sequence, comparative=False, return_amino_acid=config.self_supervision)
     test_split_dataset = SplitDataset(test_dataset_ft, "test", binary=True, full=config.full_sequence, comparative=False, return_amino_acid=config.self_supervision)
-    
+
     clinical_dataset = SplitDataset(clinical_dataset, "infer", binary=True, full=config.full_sequence, comparative=False, return_amino_acid=False)
     clinical_loader = GraphDataLoader(clinical_dataset, batch_size=config.batch_size, collate_fn=collate, shuffle=False, num_workers=config.num_workers)
 
